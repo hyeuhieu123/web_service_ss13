@@ -1,0 +1,41 @@
+🎯 1. Payload trong JWT là gì?
+Là phần giữa trong chuỗi Header.Payload.Signature
+
+Chứa các claims – chính là dữ liệu người dùng + metadata.
+
+Được mã hóa Base64URL, KHÔNG mã hóa hoặc bảo vệ nội dung, chỉ che nhìn.
+
+🧱 2. Các loại Claims trong Payload
+✅ A. Registered Claims (chuẩn – đã định nghĩa sẵn)
+Tên	Ý nghĩa	Ghi chú
+iss	Issuer – ai phát hành token	Ex: "auth.myapp.com"
+sub	Subject – đại diện cho ai	Ex: "user123"
+aud	Audience – token dành cho ai	Ex: "mobile-app"
+exp	Expiration Time – thời gian hết hạn (epoch sec)	Dùng để xác định token có còn giá trị
+nbf	Not Before – trước thời gian này thì token không hợp lệ	Để delay hiệu lực token
+iat	Issued At – thời điểm phát hành	Để xác định thời gian tạo
+jti	JWT ID – mã định danh token	Giúp phân biệt giữa các token khác nhau
+
+🛠️ B. Public / Custom Claims (do mình định nghĩa)
+Tên	Ý nghĩa	Ví dụ
+name	Tên người dùng	"Trung Hiếu"
+role	Vai trò người dùng	"ADMIN" / "USER"
+email	Email	"hieu@example.com"
+permissions	Danh sách quyền	["READ", "WRITE"]
+isPremium	Trạng thái VIP	true / false
+
+📌 Lưu ý: Custom claims tự do định nghĩa, miễn là không trùng với registered claims.
+
+🔐 3. Rủi ro bảo mật nếu để thông tin nhạy cảm trong Payload
+⚠️ CẢNH BÁO: Payload KHÔNG được mã hóa!
+
+👉 Chỉ được mã hóa base64URL → rất dễ decode bằng công cụ online
+
+👉 Ai có token đều có thể đọc được toàn bộ Payload mà không cần secret key
+
+🔥 Các rủi ro cụ thể:
+Thông tin lộ	Rủi ro gây ra
+🔓 password, access_token, số CCCD,...	Lộ trực tiếp → bị đánh cắp tài khoản
+🗺️ role, permissions	Hacker có thể hiểu quyền hệ thống để tấn công
+🕵️ email, phone, userId	Bị spam, giả mạo, tấn công định danh
+💣 internal_flag, secret config	Hacker dùng thông tin hệ thống để khai thác

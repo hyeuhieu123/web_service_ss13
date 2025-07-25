@@ -1,0 +1,76 @@
+🔁 Quy trình xác thực JWT giữa Client và Server
+🎯 Tóm tắt 2 giai đoạn:
+Client đăng nhập → nhận JWT từ Server
+
+Client gửi JWT ở các request sau → Server kiểm tra và xác thực
+
+🔍 Chi tiết từng bước (Flow):
+🎬 1. Login - Client gửi thông tin đăng nhập
+css
+Copy
+Edit
+POST /login
+Body: { username, password }
+📌 Client nhập thông tin để xác thực ban đầu
+
+🧠 2. Server xác thực thông tin
+Kiểm tra username/password với DB
+
+Nếu đúng → tạo JWT (chứa user id, role, thời gian hết hạn…)
+
+java
+Copy
+Edit
+Payload = {
+  "sub": "userId123",
+  "role": "USER",
+  "exp": 1690003600
+}
+📌 Server tạo token đại diện danh tính người dùng
+
+🎁 3. Server trả JWT về cho Client
+json
+Copy
+Edit
+{
+  "token": "xxxxx.yyyyy.zzzzz"
+}
+📌 Client nhận JWT → thường lưu vào localStorage, sessionStorage hoặc HttpOnly cookie
+
+📡 4. Client gửi JWT kèm mỗi request sau
+sql
+Copy
+Edit
+GET /profile
+Headers: Authorization: Bearer xxxxx.yyyyy.zzzzz
+📌 Client tự động đính kèm token vào mỗi request để chứng minh danh tính
+
+🔐 5. Server xác thực token (verify JWT)
+Server sẽ:
+
+Tách 3 phần token: Header, Payload, Signature
+
+Dùng secret key để verify chữ ký (Signature)
+
+Kiểm tra exp (hết hạn chưa), sub, role, v.v.
+
+📌 Nếu hợp lệ ⇒ cho phép truy cập
+❌ Nếu token sai / hết hạn ⇒ 401 Unauthorized
+
+✅ 6. Server xử lý logic và phản hồi
+css
+Copy
+Edit
+HTTP/1.1 200 OK
+Body: { profile info... }
+
+
+
+🧩 Giải thích vai trò từng bước
+Bước	Vai trò
+1. Login	Gửi thông tin xác thực để bắt đầu phiên
+2. Verify login	Server kiểm tra hợp lệ để sinh token
+3. Phát hành JWT	Cấp phép người dùng với một token
+4. Gửi JWT	Xác minh danh tính ở mỗi request
+5. Xác thực JWT	Bảo đảm token còn hạn, không giả mạo
+6. Trả dữ liệu	Gửi về thông tin yêu cầu nếu đúng

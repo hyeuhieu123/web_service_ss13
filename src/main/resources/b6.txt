@@ -1,0 +1,64 @@
+❌ 1. Tình huống lỗi phổ biến của JWT
+STT	Tình huống	Mô tả lỗi
+1️⃣	Thiếu token	Client không gửi token
+2️⃣	Token không hợp lệ	Token bị sửa, sai format, không verify được
+3️⃣	Token hết hạn	Trường exp nhỏ hơn thời gian hiện tại
+4️⃣	Token bị giả mạo	Signature không đúng (lý do: sai secret)
+5️⃣	Token bị revoke (thu hồi)	Hệ thống đã vô hiệu hóa (lưu token ID trong blacklist)
+6️⃣	Token chưa hợp lệ (nbf)	Token chưa đến thời gian hiệu lực
+7️⃣	Sai audience (aud) hoặc issuer (iss)	Không khớp đối tượng sử dụng hoặc hệ thống phát hành
+8️⃣	Refresh token không hợp lệ	Refresh token sai / đã hết hạn / không đúng với access token
+
+🧾 2. Ví dụ JSON response khi server báo lỗi
+1️⃣ Token không hợp lệ (malformed, signature sai)
+json
+Copy
+Edit
+{
+  "error": "INVALID_TOKEN",
+  "message": "Token is invalid or has been tampered with",
+  "code": 401
+}
+2️⃣ Token hết hạn
+json
+Copy
+Edit
+{
+  "error": "TOKEN_EXPIRED",
+  "message": "Token has expired",
+  "code": 401
+}
+3️⃣ Không gửi token
+json
+Copy
+Edit
+{
+  "error": "MISSING_TOKEN",
+  "message": "Authorization token is required",
+  "code": 401
+}
+4️⃣ Token bị revoke / không được phép
+json
+Copy
+Edit
+{
+  "error": "UNAUTHORIZED",
+  "message": "This token has been revoked or is no longer valid",
+  "code": 401
+}
+🧭 3. Hành động phù hợp phía client
+Trường hợp	Gợi ý xử lý (client)
+❌ Không có token	→ Thông báo: “Bạn chưa đăng nhập” → Redirect trang login
+❌ Token sai / giả mạo	→ Logout ngay (xóa token) → Thông báo: “Phiên đăng nhập không hợp lệ”
+❌ Token hết hạn	→ Gửi refresh token (nếu có) để lấy access token mới. Nếu không có → logout
+❌ Token bị thu hồi	→ Thông báo: “Bạn đã đăng xuất trên thiết bị khác” → Logout
+❌ Token chưa hợp lệ (nbf)	→ Thử lại sau vài giây
+❌ Token đúng nhưng không có quyền (403)	→ Thông báo: “Bạn không có quyền truy cập chức năng này”
+
+✅ Tóm gọn keyword dễ nhớ
+Vấn đề	Từ khóa	Hành động
+❌ Không token	MISSING_TOKEN	Thông báo + Redirect login
+❌ Hết hạn	TOKEN_EXPIRED	Refresh → nếu fail thì logout
+❌ Sửa token	INVALID_TOKEN	Logout + cảnh báo
+❌ Không đúng quyền	FORBIDDEN (403)	Thông báo “Không đủ quyền”
+❌ Bị revoke	REVOKED_TOKEN	Logout + thông báo bảo mật
